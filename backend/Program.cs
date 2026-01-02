@@ -6,7 +6,9 @@ using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Serilog;
+using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +25,12 @@ var audience = jwtSection["Audience"];
 var key = jwtSection["Key"];
 
 // Services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+  .AddJsonOptions(options =>
+  {
+    // Allow enums to be sent/received as strings (e.g., "Beginner", "Video")
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+  });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -56,7 +63,11 @@ builder.Services.AddSwaggerGen(options =>
   });
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+  options.AddPolicy("InstructorOnly", policy =>
+    policy.RequireRole(nameof(UserRole.Instructor)));
+});
 
 // EF Core (PostgreSQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -100,7 +111,8 @@ builder.Services
       ValidateIssuerSigningKey = true,
       ValidIssuer = issuer,
       ValidAudience = audience,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!))
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
+      RoleClaimType = ClaimTypes.Role
     };
   });
 

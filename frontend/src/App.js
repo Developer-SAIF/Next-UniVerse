@@ -17,13 +17,20 @@ import {
 } from "@chakra-ui/react";
 import CoursesPage from "./pages/CoursesPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
+import InstructorDashboardPage from "./pages/InstructorDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import { clearAccessToken, getAccessToken } from "./auth/token";
+import {
+  clearAccessToken,
+  getAccessToken,
+  isInstructorToken,
+} from "./auth/token";
 
 function Header() {
   const navigate = useNavigate();
-  const hasToken = Boolean(getAccessToken());
+  const token = getAccessToken();
+  const hasToken = Boolean(token);
+  const isInstructor = isInstructorToken(token);
 
   return (
     <Box borderBottomWidth="1px" py={3}>
@@ -39,6 +46,12 @@ function Header() {
           <Link as={RouterLink} to="/courses">
             Courses
           </Link>
+
+          {isInstructor ? (
+            <Link as={RouterLink} to="/instructor">
+              Instructor
+            </Link>
+          ) : null}
 
           {hasToken ? (
             <Button
@@ -72,6 +85,9 @@ function Header() {
 }
 
 function App() {
+  const token = getAccessToken();
+  const isInstructor = isInstructorToken(token);
+
   return (
     <Box minH="100vh">
       <Header />
@@ -81,6 +97,16 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/courses/:id" element={<CourseDetailPage />} />
+        <Route
+          path="/instructor"
+          element={
+            isInstructor ? (
+              <InstructorDashboardPage />
+            ) : (
+              <Navigate to="/courses" replace />
+            )
+          }
+        />
         <Route path="*" element={<Navigate to="/courses" replace />} />
       </Routes>
     </Box>

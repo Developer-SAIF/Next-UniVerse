@@ -19,6 +19,72 @@ Content-Type: application/json
 	"password": "ChangeMe123!"
 }
 
+### Dev: Register instructor (Development only)
+# @name instructorRegister
+POST {{backend_HostAddress}}/auth/dev/register-instructor
+Content-Type: application/json
+
+{
+	"name": "Instructor One",
+	"email": "instructor@example.com",
+	"password": "ChangeMe123!"
+}
+
+### Instructor: List my courses
+GET {{backend_HostAddress}}/instructor/courses
+Accept: application/json
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
+### Instructor: Create a course
+# @name createCourse
+POST {{backend_HostAddress}}/instructor/courses
+Content-Type: application/json
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
+{
+	"title": "Intro to Databases",
+	"description": "Learn relational modeling and SQL.",
+	"language": "en",
+	"level": "Beginner"
+}
+
+### Instructor: Publish the course
+POST {{backend_HostAddress}}/instructor/courses/{{createCourse.response.body.id}}/publish
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
+### Instructor: Create a module
+# @name createModule
+POST {{backend_HostAddress}}/instructor/courses/{{createCourse.response.body.id}}/modules
+Content-Type: application/json
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
+{
+	"title": "Module 1: Basics",
+	"position": 1,
+	"description": "Getting started"
+}
+
+### Instructor: Add a material
+POST {{backend_HostAddress}}/instructor/modules/{{createModule.response.body.id}}/materials
+Content-Type: application/json
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
+{
+	"kind": "Video",
+	"title": "Welcome video",
+	"description": "Intro",
+	"storageUrl": "https://example.com/video",
+	"mimeType": "video/mp4",
+	"sizeBytes": null,
+	"requiresAuth": false,
+	"position": 1
+}
+
+### Instructor: List modules for course
+GET {{backend_HostAddress}}/instructor/courses/{{createCourse.response.body.id}}/modules
+Accept: application/json
+Authorization: Bearer {{instructorRegister.response.body.accessToken}}
+
 ### List courses
 GET {{backend_HostAddress}}/courses
 Accept: application/json
