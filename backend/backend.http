@@ -1,6 +1,54 @@
 @backend_HostAddress = http://localhost:5095
 
-GET {{backend_HostAddress}}/weatherforecast/
+### Register
+POST {{backend_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+	"name": "Test User",
+	"email": "test@example.com",
+	"password": "ChangeMe123!"
+}
+
+### Login
+POST {{backend_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+	"email": "test@example.com",
+	"password": "ChangeMe123!"
+}
+
+### List courses
+GET {{backend_HostAddress}}/courses
 Accept: application/json
+
+### Get course detail
+GET {{backend_HostAddress}}/courses/1
+Accept: application/json
+
+### My enrollments (set token)
+# @name login
+POST {{backend_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+	"email": "test@example.com",
+	"password": "ChangeMe123!"
+}
+
+### Enroll (replace courseId)
+POST {{backend_HostAddress}}/enrollments
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
+
+{
+	"courseId": 1
+}
+
+### List my enrollments
+GET {{backend_HostAddress}}/enrollments/me
+Accept: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###
